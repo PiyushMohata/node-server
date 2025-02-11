@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "main": "MyApp.js",
   "scripts": {
-    "start": "node MyApp.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node MyApp.js"
   },
   "keywords": [],
   "author": "",
@@ -12,5 +11,7 @@
   "description": "",
   "dependencies": {
     "express": "^4.21.2"
+  },
+  "devDependencies": {
   }
 }
