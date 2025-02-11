@@ -1,0 +1,35 @@
+name: Deploy Node.js App to Amazon Linux EC2
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy Project Files to EC2
+        run: |
+          scp -i ~/.ssh/deploy_key -r . ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/app
+
+      - name: SSH into EC2 and Deploy
+        run: |
+          ssh -i ~/.ssh/deploy_key ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+          cd /home/ec2-user/app
+          docker stop node_app || true
+          docker rm node_app || true
+          docker build -t node-app .
+          docker run -d -p 3000:3000 --name node_app node-app
+          EOF
