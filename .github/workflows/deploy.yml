@@ -38,8 +38,8 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${{ secrets.EC2_HOST }} <<EOF
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-app:latest
-          docker stop node_app || true
-          docker rm node_app || true
-          docker run -d -p 3000:3000 --name node_app ${{ secrets.DOCKERHUB_USERNAME }}/node-app:latest
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-app:latest
+          sudo docker stop node_app || true
+          sudo docker rm node_app || true
+          sudo docker run -d -p 3000:3000 --name node_app ${{ secrets.DOCKERHUB_USERNAME }}/node-app:latest
           EOF
