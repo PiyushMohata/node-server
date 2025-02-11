@@ -24,13 +24,19 @@ jobs:
       - name: Set up SSH Key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          printf "%s" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Debug SSH Configuration
+        run: |
+          echo "EC2 Host: ${{ secrets.EC2_HOST }}"
+          ls -l ~/.ssh
+          cat ~/.ssh/known_hosts
+
       - name: Deploy on EC2
         run: |
-          ssh -i ~/.ssh/deploy_key ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ec2-user@${{ secrets.EC2_HOST }} <<EOF
           docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-app:latest
           docker stop node_app || true
           docker rm node_app || true
