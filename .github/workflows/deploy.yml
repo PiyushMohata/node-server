@@ -21,13 +21,6 @@ jobs:
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/node-app:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/node-app:latest
 
-      - name: Set up SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          printf "%s" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-
       - name: Deploy on EC2
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
