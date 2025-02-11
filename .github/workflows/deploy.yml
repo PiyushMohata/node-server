@@ -28,12 +28,6 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Debug SSH Configuration
-        run: |
-          echo "EC2 Host: ${{ secrets.EC2_HOST }}"
-          ls -l ~/.ssh
-          cat ~/.ssh/known_hosts
-
       - name: Deploy on EC2
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
