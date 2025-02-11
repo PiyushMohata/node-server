@@ -13,6 +13,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/node-app:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/node-app:latest
+
       - name: Set up SSH Key
         run: |
           mkdir -p ~/.ssh
@@ -22,20 +30,11 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/deploy_key
 
-      - name: Debug SSH Connection
-        run: |
-          ssh -v -i ~/.ssh/deploy_key ec2-user@${{ secrets.EC2_HOST }} "echo SSH connection successful"
-
-      - name: Copy Project Files to EC2
-        run: |
-          scp -i ~/.ssh/deploy_key -r . ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/app
-
       - name: Deploy on EC2
         run: |
           ssh -i ~/.ssh/deploy_key ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-          cd /home/ec2-user/app
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-app:latest
           docker stop node_app || true
           docker rm node_app || true
-          docker build -t node-app .
-          docker run -d -p 3000:3000 --name node_app node-app
+          docker run -d -p 3000:3000 --name node_app ${{ secrets.DOCKERHUB_USERNAME }}/node-app:latest
           EOF
