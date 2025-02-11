@@ -22,6 +22,10 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add ~/.ssh/deploy_key
 
+      - name: Debug SSH Connection
+        run: |
+          ssh -v -i ~/.ssh/deploy_key ec2-user@${{ secrets.EC2_HOST }} "echo SSH connection successful"
+
       - name: Copy Project Files to EC2
         run: |
           scp -i ~/.ssh/deploy_key -r . ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/app
